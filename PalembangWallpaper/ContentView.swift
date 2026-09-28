@@ -8,9 +8,9 @@ import PalembangSwiftUI
 struct ContentView: View {
     @EnvironmentObject private var model: WallpaperModel
     var body: some View {
-        TimelineView(.periodic(from: Date(), by: model.displayMode == .pulse ? 1 : 60)) { context in
+        TimelineView(.periodic(from: Date(), by: model.displayMode == .pulse ? 0.05 : 0.1)) { context in
             Group {
-                if let palette = model.palette(at: context.date) { PalembangView(palette: palette).ignoresSafeArea().animation(.easeInOut(duration: 1.5), value: palette) }
+                if let palette = model.palette(at: context.date) { PalembangView(palette: palette).ignoresSafeArea() }
                 else { VStack(spacing: 12) { Image(systemName: "location.slash").font(.title); Text(model.statusMessage).multilineTextAlignment(.center); HStack { if model.canRequestLocation { Button("Use Current Location") { model.requestAutomaticLocation() } }; Button("Choose a City…") { model.selectMode(.city) } }; Button("Custom Location…") { model.selectMode(.custom) }.buttonStyle(.link) }.frame(maxWidth: .infinity, maxHeight: .infinity).background(.black).foregroundStyle(.white) }
             }
         }
@@ -50,6 +50,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
     var resolvedLabel: String? { LocationSourceResolver.displayLabel(mode: locationMode, automatic: automaticCoordinate, city: selectedCityLocation, custom: customLocation) }
     private var customLocation: CustomLocation? { try? CustomLocation(label: customLabel, latitude: Double(customLatitude) ?? .nan, longitude: Double(customLongitude) ?? .nan) }
     private var pulseConfiguration: PulseConfiguration? { try? PulseConfiguration(transitionMinutes: Double(pulseTransitionDuration) ?? .nan, holdMinutes: Double(pulseHoldDuration) ?? .nan) }
+    var pulseCycleDescription: String { pulseConfiguration.map { String(format: "%.0f min per cycle", $0.cycleSeconds / 60) } ?? "—" }
     func selectDisplayMode(_ mode: DisplayMode) { displayMode = mode; defaults.set(mode.rawValue, forKey: Keys.displayMode); if mode == .pulse { ensurePulseEpoch() }; if mode == .live { locationService.start(); syncLocationState() }; updateStatus() }
     func savePulseConfiguration(transition: String, hold: String) -> Bool { do { let configuration = try PulseConfiguration(transitionMinutes: Double(transition.trimmingCharacters(in: .whitespacesAndNewlines)) ?? .nan, holdMinutes: Double(hold.trimmingCharacters(in: .whitespacesAndNewlines)) ?? .nan); pulseTransitionDuration = String(configuration.transitionMinutes); pulseHoldDuration = String(configuration.holdMinutes); defaults.set(pulseTransitionDuration, forKey: Keys.transition); defaults.set(pulseHoldDuration, forKey: Keys.hold); pulseValidationMessage = nil; updateStatus(); return true } catch let error as PulseConfiguration.ValidationError { pulseValidationMessage = error.localizedDescription; return false } catch { pulseValidationMessage = "Pulse durations must be valid numbers."; return false } }
     private func ensurePulseEpoch() { if defaults.object(forKey: Keys.epoch) == nil { pulseEpoch = Date(); defaults.set(pulseEpoch.timeIntervalSince1970, forKey: Keys.epoch) } }
@@ -83,7 +84,48 @@ struct LocationSettingsView: View {
         .onAppear { label = model.customLabel; latitude = model.customLatitude; longitude = model.customLongitude; transition = model.pulseTransitionDuration; hold = model.pulseHoldDuration }
     }
     private var locationTab: some View { Form { Section { Picker("Source", selection: Binding(get: { model.locationMode }, set: { model.selectMode($0) })) { ForEach(LocationMode.allCases) { Text($0.title).tag($0) } }.pickerStyle(.segmented); Text("Used by Live mode.").font(.caption).foregroundStyle(.secondary) }; switch model.locationMode { case .automatic: automaticControls; case .city: cityControls; case .custom: customControls } } }
-    private var pulseTab: some View { Form { Section { Picker("Display Mode", selection: Binding(get: { model.displayMode }, set: { model.selectDisplayMode($0) })) { ForEach(DisplayMode.allCases) { Text($0.title).tag($0) } }.pickerStyle(.segmented); Text("Day → transition → night → transition → day").font(.caption).foregroundStyle(.secondary) }; Section("Timing") { HStack { Text("Transition Duration"); TextField("10", text: $transition).frame(width: 70); Text("min") }; HStack { Text("Hold Duration"); TextField("30", text: $hold).frame(width: 70); Text("min") }; if let message = model.pulseValidationMessage { Text(message).foregroundStyle(.red).font(.caption) }; Button("Apply Pulse Settings") { _ = model.savePulseConfiguration(transition: transition, hold: hold) } } } }
+    private var pulseTab: some View {
+        Form {
+            Section {
+                Picker("Display Mode", selection: Binding(get: { model.displayMode }, set: { model.selectDisplayMode($0) })) {
+                    ForEach(DisplayMode.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+            }
+            Section("Timing") {
+                Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 8) {
+                    GridRow {
+                        Text("Transition")
+                        durationField(text: $transition)
+                    }
+                    GridRow {
+                        Text("Hold")
+                        durationField(text: $hold)
+                    }
+                }
+                Text("Day → Night → Day · \(model.pulseCycleDescription)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                if let message = model.pulseValidationMessage {
+                    Text(message).foregroundStyle(.red).font(.caption)
+                }
+                HStack {
+                    Spacer()
+                    Button("Apply") { _ = model.savePulseConfiguration(transition: transition, hold: hold) }
+                }
+            }
+        }
+    }
+    private func durationField(text: Binding<String>) -> some View {
+        HStack(spacing: 6) {
+            TextField("", text: text)
+                .frame(width: 64)
+                .multilineTextAlignment(.trailing)
+            Text("min").foregroundStyle(.secondary)
+        }
+    }
     @ViewBuilder private var automaticControls: some View { Text(model.authorizationStatus.label).foregroundStyle(.secondary); if let label = model.resolvedLabel { Text(label).font(.caption) }; HStack { if model.canRequestLocation { Button("Request Permission") { model.requestAutomaticLocation() } }; if model.isLocationDenied { Button("Open System Settings") { model.openSystemSettings() } }; Button("Refresh") { model.refreshAutomaticLocation() } } }
     @ViewBuilder private var cityControls: some View { Picker("Country", selection: Binding(get: { model.selectedCountry }, set: { model.selectCountry($0) })) { ForEach(CityCatalog.countries, id: \.self) { Text($0).tag($0) } }; Picker("City", selection: Binding(get: { model.selectedCity }, set: { model.selectCity($0) })) { ForEach(model.filteredCities) { Text($0.cityName).tag($0.cityName) } }; if let label = model.resolvedLabel { Text(label).font(.caption).foregroundStyle(.secondary) } }
     @ViewBuilder private var customControls: some View { TextField("Label (optional)", text: $label); TextField("Latitude", text: $latitude); TextField("Longitude", text: $longitude); if let message = model.validationMessage { Text(message).foregroundStyle(.red).font(.caption) }; Button("Save Custom Coordinates") { _ = model.saveCustom(label: label, latitude: latitude, longitude: longitude) } }
