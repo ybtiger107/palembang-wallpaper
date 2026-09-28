@@ -65,4 +65,33 @@ final class LogicTests: XCTestCase {
         XCTAssertEqual(LocationSourceResolver.coordinate(mode: .custom, automatic: automatic, city: city, custom: custom)?.longitude, 4)
         XCTAssertNil(LocationSourceResolver.coordinate(mode: .city, automatic: automatic, city: nil, custom: custom))
     }
+
+    func testPulseCycleDurationFormulaAndValidation() throws {
+        let configuration = try PulseConfiguration(transitionMinutes: 10, holdMinutes: 30)
+        XCTAssertEqual(configuration.cycleSeconds, 4_800)
+        XCTAssertThrowsError(try PulseConfiguration(transitionMinutes: 0, holdMinutes: 30))
+        XCTAssertThrowsError(try PulseConfiguration(transitionMinutes: .infinity, holdMinutes: 30))
+        XCTAssertThrowsError(try PulseConfiguration(transitionMinutes: 10, holdMinutes: -1))
+    }
+
+    func testPulsePaletteUsesTheFourExpectedAnchors() throws {
+        let configuration = try PulseConfiguration(transitionMinutes: 1, holdMinutes: 1)
+        let epoch = Date(timeIntervalSince1970: 1_000_000)
+        XCTAssertEqual(PulseEngine.palette(at: epoch, epoch: epoch, configuration: configuration), WallpaperPalette.original.colors)
+        XCTAssertEqual(PulseEngine.palette(at: epoch.addingTimeInterval(60), epoch: epoch, configuration: configuration), WallpaperPalette.original.colors)
+        XCTAssertEqual(PulseEngine.palette(at: epoch.addingTimeInterval(90), epoch: epoch, configuration: configuration), WallpaperPalette.midnight.colors)
+        XCTAssertEqual(PulseEngine.palette(at: epoch.addingTimeInterval(120), epoch: epoch, configuration: configuration), WallpaperPalette.obsidian.colors)
+        XCTAssertEqual(PulseEngine.palette(at: epoch.addingTimeInterval(180), epoch: epoch, configuration: configuration), WallpaperPalette.obsidian.colors)
+        XCTAssertEqual(PulseEngine.palette(at: epoch.addingTimeInterval(210), epoch: epoch, configuration: configuration), WallpaperPalette.aurora.colors)
+        XCTAssertEqual(PulseEngine.palette(at: epoch.addingTimeInterval(240), epoch: epoch, configuration: configuration), WallpaperPalette.original.colors)
+        XCTAssertEqual(PulseEngine.palette(at: epoch.addingTimeInterval(480), epoch: epoch, configuration: configuration), WallpaperPalette.original.colors)
+    }
+
+    func testPulseIsDeterministicAndIndependentOfLocation() throws {
+        let configuration = try PulseConfiguration(transitionMinutes: 2.5, holdMinutes: 3.5)
+        let epoch = Date(timeIntervalSince1970: 1_700_000_000)
+        let date = epoch.addingTimeInterval(421)
+        XCTAssertEqual(PulseEngine.palette(at: date, epoch: epoch, configuration: configuration), PulseEngine.palette(at: date, epoch: epoch, configuration: configuration))
+        XCTAssertNotEqual(SolarEngine.state(at: date, latitude: 37.5665, longitude: 126.9780), SolarEngine.state(at: date, latitude: 51.5074, longitude: -0.1278))
+    }
 }

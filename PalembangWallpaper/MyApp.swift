@@ -23,6 +23,12 @@ struct AppCommands: Commands {
             Button("Custom Coordinates…") { model.selectMode(.custom); openSettings() }
             if model.isLocationDenied { Button("Open Location Settings…") { model.openSystemSettings() } }
         }
+        CommandMenu("Mode") {
+            Toggle("Live", isOn: Binding(get: { model.displayMode == .live }, set: { if $0 { model.selectDisplayMode(.live) } }))
+            Toggle("Pulse", isOn: Binding(get: { model.displayMode == .pulse }, set: { if $0 { model.selectDisplayMode(.pulse) } }))
+            Divider()
+            Button("Pulse Settings…") { openSettings() }
+        }
     }
 }
 
@@ -54,9 +60,14 @@ final class MenuOrderDelegate: NSObject, NSApplicationDelegate {
         guard let mainMenu = NSApp.mainMenu,
               let locationItem = mainMenu.items.first(where: { $0.title == "Location" }),
               mainMenu.items.count > 1 else { return }
-        let currentIndex = mainMenu.index(of: locationItem)
-        guard currentIndex != 1 else { return }
-        mainMenu.removeItem(at: currentIndex)
-        mainMenu.insertItem(locationItem, at: 1)
+        move(locationItem, to: 1, in: mainMenu)
+        if let modeItem = mainMenu.items.first(where: { $0.title == "Mode" }) { move(modeItem, to: 2, in: mainMenu) }
+    }
+
+    private func move(_ item: NSMenuItem, to index: Int, in menu: NSMenu) {
+        let currentIndex = menu.index(of: item)
+        guard currentIndex != index, menu.items.count > index else { return }
+        menu.removeItem(at: currentIndex)
+        menu.insertItem(item, at: index)
     }
 }

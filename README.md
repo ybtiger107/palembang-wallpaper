@@ -22,6 +22,14 @@ Location controls are available through the native macOS menu bar and compact
 Settings window. The artwork surface remains clean, including in fullscreen;
 move the pointer to the top edge to reveal the macOS menu bar.
 
+Display modes:
+
+- Live follows the local solar cycle using the configured location.
+- Pulse is location-independent and continuously cycles Original → Midnight →
+  Obsidian → Aurora → Original. Its Transition Duration and Hold Duration are
+  configurable in Settings. Pulse is entirely local and does not require
+  location permission.
+
 v0.1 is intentionally limited to a wallpaper-like fullscreen window. It does
 not change the macOS desktop wallpaper itself and has no weather, cloud sync,
 or multi-monitor management.
