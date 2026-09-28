@@ -19,15 +19,15 @@ struct AppCommands: Commands {
             Button("Automatic Location") { model.selectMode(.automatic) }
             Button("Refresh Current Location") { model.refreshAutomaticLocation() }
             Divider()
-            Button("Choose City…") { model.selectMode(.city); openSettings() }
-            Button("Custom Coordinates…") { model.selectMode(.custom); openSettings() }
+            Button("Choose City…") { model.selectMode(.city); model.settingsTab = .location; openSettings() }
+            Button("Custom Coordinates…") { model.selectMode(.custom); model.settingsTab = .location; openSettings() }
             if model.isLocationDenied { Button("Open Location Settings…") { model.openSystemSettings() } }
         }
         CommandMenu("Mode") {
             Toggle("Live", isOn: Binding(get: { model.displayMode == .live }, set: { if $0 { model.selectDisplayMode(.live) } }))
             Toggle("Pulse", isOn: Binding(get: { model.displayMode == .pulse }, set: { if $0 { model.selectDisplayMode(.pulse) } }))
             Divider()
-            Button("Pulse Settings…") { openSettings() }
+            Button("Pulse Settings…") { model.settingsTab = .pulse; openSettings() }
         }
     }
 }
