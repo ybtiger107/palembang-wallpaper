@@ -11,15 +11,20 @@ The local solar cycle drives a continuous six-token palette transition:
 - Night (`<= -6°`): Obsidian
 - Sunrise: Obsidian → Aurora → Original
 
-Location can come from CoreLocation (Automatic) or a locally entered latitude
-and longitude (Manual). Country and city are optional display labels. Location
-and all solar calculations stay on-device; there is no network request,
-geocoding, backend, analytics, or telemetry. If access is denied or unwanted,
-manual coordinates can be used without any online lookup.
+Location offers Automatic (CoreLocation), City, and Custom Coordinates. The
+city catalog is a small bundled offline catalog; selecting a city never makes a
+network or geocoding request. Custom Coordinates is an advanced fallback for
+unsupported cities, precise preferences, and testing. All location and solar
+calculations stay on-device; there is no backend, analytics, telemetry, or
+location upload.
+
+Location controls are available through the native macOS menu bar and compact
+Settings window. The artwork surface remains clean, including in fullscreen;
+move the pointer to the top edge to reveal the macOS menu bar.
 
 v0.1 is intentionally limited to a wallpaper-like fullscreen window. It does
-not change the macOS desktop wallpaper itself and has no settings, weather,
-cloud sync, or multi-monitor management.
+not change the macOS desktop wallpaper itself and has no weather, cloud sync,
+or multi-monitor management.
 
 Built using the Palembang Graphic System 0.8.0:
 https://github.com/ybtiger107/palembang-graphic-system

@@ -40,26 +40,29 @@ final class LogicTests: XCTestCase {
         XCTAssertEqual(PaletteEngine.blend(start, end, amount: 0.5), PaletteEngine.blend(start, end, amount: 0.5))
     }
 
-    func testManualLocationAcceptsCoordinateBoundaries() throws {
-        XCTAssertNoThrow(try ManualLocation(latitude: -90, longitude: -180))
-        XCTAssertNoThrow(try ManualLocation(latitude: 90, longitude: 180))
+    func testCityCatalogContainsValidCoordinates() {
+        XCTAssertFalse(CityCatalog.all.isEmpty)
+        XCTAssertTrue(CityCatalog.all.allSatisfy { $0.latitude.isFinite && (-90...90).contains($0.latitude) && $0.longitude.isFinite && (-180...180).contains($0.longitude) })
+        XCTAssertEqual(CityCatalog.find(country: "South Korea", city: "Seoul")?.coordinate.latitude, 37.5665)
     }
 
     func testManualLocationRejectsInvalidCoordinates() {
-        XCTAssertThrowsError(try ManualLocation(latitude: -90.001, longitude: 0)) { error in
-            XCTAssertEqual(error as? ManualLocation.ValidationError, .invalidLatitude)
+        XCTAssertThrowsError(try CustomLocation(latitude: -90.001, longitude: 0)) { error in
+            XCTAssertEqual(error as? CustomLocation.ValidationError, .invalidLatitude)
         }
-        XCTAssertThrowsError(try ManualLocation(latitude: 0, longitude: 180.001)) { error in
-            XCTAssertEqual(error as? ManualLocation.ValidationError, .invalidLongitude)
+        XCTAssertThrowsError(try CustomLocation(latitude: 0, longitude: 180.001)) { error in
+            XCTAssertEqual(error as? CustomLocation.ValidationError, .invalidLongitude)
         }
-        XCTAssertThrowsError(try ManualLocation(latitude: .infinity, longitude: 0))
+        XCTAssertThrowsError(try CustomLocation(latitude: .infinity, longitude: 0))
     }
 
     func testLocationModeSelectsTheCorrectCoordinateSource() throws {
         let automatic = CLLocationCoordinate2D(latitude: 1, longitude: 2)
-        let manual = try ManualLocation(latitude: 3, longitude: 4)
-        XCTAssertEqual(LocationSourceResolver.coordinate(mode: .automatic, automatic: automatic, manual: manual)?.latitude, 1)
-        XCTAssertEqual(LocationSourceResolver.coordinate(mode: .manual, automatic: automatic, manual: manual)?.longitude, 4)
-        XCTAssertNil(LocationSourceResolver.coordinate(mode: .manual, automatic: automatic, manual: nil))
+        let custom = try CustomLocation(latitude: 3, longitude: 4)
+        let city = CityLocation(countryCode: "X", countryName: "Example", cityName: "Place", latitude: 5, longitude: 6)
+        XCTAssertEqual(LocationSourceResolver.coordinate(mode: .automatic, automatic: automatic, city: city, custom: custom)?.latitude, 1)
+        XCTAssertEqual(LocationSourceResolver.coordinate(mode: .city, automatic: automatic, city: city, custom: custom)?.longitude, 6)
+        XCTAssertEqual(LocationSourceResolver.coordinate(mode: .custom, automatic: automatic, city: city, custom: custom)?.longitude, 4)
+        XCTAssertNil(LocationSourceResolver.coordinate(mode: .city, automatic: automatic, city: nil, custom: custom))
     }
 }
