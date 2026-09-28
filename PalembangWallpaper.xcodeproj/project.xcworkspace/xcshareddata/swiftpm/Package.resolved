@@ -1,0 +1,15 @@
+{
+  "originHash" : "eec4e856215871426457b9bf7c00f86d1e7658766c0c6718e7164e3e260b2716",
+  "pins" : [
+    {
+      "identity" : "palembang-graphic-system",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ybtiger107/palembang-graphic-system.git",
+      "state" : {
+        "revision" : "79a100f9d45aee0c193fa43f75976806612258b4",
+        "version" : "0.8.0"
+      }
+    }
+  ],
+  "version" : 3
+}
