@@ -11,6 +11,16 @@
 		234248113069FC7000830BA8 /* PalembangSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 234248103069FC7000830BA8 /* PalembangSwiftUI */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		234248493069FF4100830BA8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 000000000000000100000000;
+			remoteInfo = PalembangWallpaper;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* PalembangWallpaper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PalembangWallpaper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		000000000000000000000220 /* PalembangWallpaperTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PalembangWallpaperTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -37,7 +47,7 @@
 				2342480F3069FC7000830BA8 /* PalembangKit in Frameworks */,
 			);
 		};
-		000000000000000160000000 /* Test Frameworks */ = {
+		000000000000000160000000 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
 			);
@@ -90,10 +100,10 @@
 		};
 		000000000000000200000000 /* PalembangWallpaperTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 000000000000000210000000 /* Build configuration list for PalembangWallpaperTests */;
+			buildConfigurationList = 000000000000000210000000 /* Build configuration list for PBXNativeTarget "PalembangWallpaperTests" */;
 			buildPhases = (
-				000000000000000250000000 /* Test Sources */,
-				000000000000000160000000 /* Test Frameworks */,
+				000000000000000250000000 /* Sources */,
+				000000000000000160000000 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -109,10 +119,6 @@
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
-
-/* Begin PBXTargetDependency section */
-		000000000000000260000000 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = 000000000000000100000000 /* PalembangWallpaper */; };
-/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		000000000000000000000000 /* Project object */ = {
@@ -164,12 +170,20 @@
 			files = (
 			);
 		};
-		000000000000000250000000 /* Test Sources */ = {
+		000000000000000250000000 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			files = (
 			);
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		000000000000000260000000 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 000000000000000100000000 /* PalembangWallpaper */;
+			targetProxy = 234248493069FF4100830BA8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		000000000000000011000000 /* Debug configuration for PBXProject "PalembangWallpaper" */ = {
@@ -433,7 +447,6 @@
 				000000000000000211000000 /* Debug configuration for PBXNativeTarget "PalembangWallpaperTests" */,
 				000000000000000212000000 /* Release configuration for PBXNativeTarget "PalembangWallpaperTests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */

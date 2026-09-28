@@ -1,4 +1,5 @@
 import XCTest
+import CoreLocation
 @testable import PalembangWallpaper
 
 final class LogicTests: XCTestCase {
@@ -37,5 +38,28 @@ final class LogicTests: XCTestCase {
         XCTAssertEqual(PaletteEngine.blend(start, end, amount: 2), end)
         XCTAssertEqual(PaletteEngine.blend(start, end, amount: 0.5).count, 6)
         XCTAssertEqual(PaletteEngine.blend(start, end, amount: 0.5), PaletteEngine.blend(start, end, amount: 0.5))
+    }
+
+    func testManualLocationAcceptsCoordinateBoundaries() throws {
+        XCTAssertNoThrow(try ManualLocation(latitude: -90, longitude: -180))
+        XCTAssertNoThrow(try ManualLocation(latitude: 90, longitude: 180))
+    }
+
+    func testManualLocationRejectsInvalidCoordinates() {
+        XCTAssertThrowsError(try ManualLocation(latitude: -90.001, longitude: 0)) { error in
+            XCTAssertEqual(error as? ManualLocation.ValidationError, .invalidLatitude)
+        }
+        XCTAssertThrowsError(try ManualLocation(latitude: 0, longitude: 180.001)) { error in
+            XCTAssertEqual(error as? ManualLocation.ValidationError, .invalidLongitude)
+        }
+        XCTAssertThrowsError(try ManualLocation(latitude: .infinity, longitude: 0))
+    }
+
+    func testLocationModeSelectsTheCorrectCoordinateSource() throws {
+        let automatic = CLLocationCoordinate2D(latitude: 1, longitude: 2)
+        let manual = try ManualLocation(latitude: 3, longitude: 4)
+        XCTAssertEqual(LocationSourceResolver.coordinate(mode: .automatic, automatic: automatic, manual: manual)?.latitude, 1)
+        XCTAssertEqual(LocationSourceResolver.coordinate(mode: .manual, automatic: automatic, manual: manual)?.longitude, 4)
+        XCTAssertNil(LocationSourceResolver.coordinate(mode: .manual, automatic: automatic, manual: nil))
     }
 }

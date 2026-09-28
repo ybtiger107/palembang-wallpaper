@@ -11,10 +11,11 @@ The local solar cycle drives a continuous six-token palette transition:
 - Night (`<= -6°`): Obsidian
 - Sunrise: Obsidian → Aurora → Original
 
-Location permission is used only to calculate latitude/longitude for the local
-solar model. Location and all solar calculations stay on-device; there is no
-network request, backend, analytics, or telemetry. If access is denied, the app
-shows a minimal local status message and does not invent a fallback location.
+Location can come from CoreLocation (Automatic) or a locally entered latitude
+and longitude (Manual). Country and city are optional display labels. Location
+and all solar calculations stay on-device; there is no network request,
+geocoding, backend, analytics, or telemetry. If access is denied or unwanted,
+manual coordinates can be used without any online lookup.
 
 v0.1 is intentionally limited to a wallpaper-like fullscreen window. It does
 not change the macOS desktop wallpaper itself and has no settings, weather,
