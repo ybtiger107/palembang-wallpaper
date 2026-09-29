@@ -1,44 +1,31 @@
 # Palembang Wallpaper
 
-Palembang Wallpaper is a small native macOS ambient application. It fills its
-resizable window with `PalembangView` from `PalembangSwiftUI`, including native
-macOS full screen, without cropping or stretching raster artwork.
+Palembang Wallpaper is a native macOS ambient application that fills a
+resizable or fullscreen window with Palembang rendering. It is wallpaper-like,
+but does not replace the actual macOS desktop wallpaper.
 
-The local solar cycle drives a continuous six-token palette transition:
+## Modes
 
-- Day (`solar elevation >= 0°`): Original
-- Sunset: Original → Midnight → Obsidian
-- Night (`<= -6°`): Obsidian
-- Sunrise: Obsidian → Aurora → Original
+- **Live** follows the local solar cycle using the configured location.
+- **Pulse** runs an independent, configurable day/night palette cycle and does
+  not require location permission.
 
-Location offers Automatic (CoreLocation), City, and Custom Coordinates. The
-city catalog is a small bundled offline catalog; selecting a city never makes a
-network or geocoding request. Custom Coordinates is an advanced fallback for
-unsupported cities, precise preferences, and testing. All location and solar
-calculations stay on-device; there is no backend, analytics, telemetry, or
-location upload.
+Location can be **Automatic** (Core Location), an offline **City**, or
+**Custom Coordinates**. The city catalog and all solar/location calculations
+are local; there is no backend, geocoding, weather API, analytics, telemetry,
+or location upload.
 
-Location controls are available through the native macOS menu bar and compact
-Settings window. The artwork surface remains clean, including in fullscreen;
-move the pointer to the top edge to reveal the macOS menu bar.
+Native macOS Location and Mode menus, Settings tabs, resizable rendering, and
+fullscreen use are included. Preferences persist across launches.
 
-Display modes:
+## Requirements
 
-- Live follows the local solar cycle using the configured location.
-- Pulse is location-independent and continuously cycles Original → Midnight →
-  Obsidian → Aurora → Original. Its Transition Duration and Hold Duration are
-  configurable in Settings. Pulse is entirely local and does not require
-  location permission.
+- macOS 26.7 or later
+- Xcode 27 or later for a source/development build
 
-v0.1 is intentionally limited to a wallpaper-like fullscreen window. It does
-not change the macOS desktop wallpaper itself and has no weather, cloud sync,
-or multi-monitor management.
+To build from source, clone this repository, open `PalembangWallpaper.xcodeproj`
+in Xcode, and build/run the `PalembangWallpaper` scheme. No signed or
+notarized standalone application is included in v0.1.0.
 
 Built using the Palembang Graphic System 0.8.0:
 https://github.com/ybtiger107/palembang-graphic-system
-
-The package's public Swift API exposes the canonical palette and six tokens,
-but not its web curated-preset catalog. Therefore Original comes directly from
-`Palembang.canonicalPalette`; Midnight, Aurora, and Obsidian are app-level
-presets copied from the package's documented curated palette data. Rendering
-remains exclusively in `PalembangSwiftUI` → `PalembangKit`.
